@@ -1,0 +1,273 @@
+
+//**TASK 1
+
+USE college_db;
+
+CREATE TABLE students (
+  student_id BIGINT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(150) UNIQUE,
+  age INT,
+  join_date DATE,
+  active_flag BIT DEFAULT 1
+);
+
+CREATE TABLE courses (
+  course_id INT PRIMARY KEY,
+  course_name VARCHAR(100) NOT NULL,
+  fees DECIMAL(10,2)
+);
+
+CREATE TABLE ENROLLMENT (
+    enroll_id BIGINT PRIMARY KEY,
+    student_id BIGINT,
+    course_id INT,
+    enroll_timestamp DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT fk_student
+        FOREIGN KEY (student_id) REFERENCES STUDENTS(student_id),
+    CONSTRAINT fk_course
+        FOREIGN KEY (course_id) REFERENCES COURSES(course_id)
+);
+
+//TASK2//
+
+INSERT INTO students (student_id, name, email, age, join_date, active_flag)
+VALUES (001,'AB','AB@gmail.com',21,'2026-02-02',1),
+(002,'BC','BC@gmail.com',21,'2026-02-02',1),
+(003,'CD','CD@gmail.com',22,'2026-02-02',1),
+(004,'DE','DE@gmail.com',22,'2026-02-02',0),
+(005,'EF','EF@gmail.com',23,'2026-02-02',0),
+(006,'FG','FG@gmail.com',24,'2026-02-02',1),
+(007,'GH','GH@gmail.com',22,'2026-02-02',0),
+(008,'HI','HI@gmail.com',24,'2026-02-02',1),
+(009,'IJ','IJ@gmail.com',25,'2026-02-02',0),
+(010,'JK','JK@gmail.com',26,'2026-02-02',1);
+
+INSERT INTO courses (course_id, course_name, fees)
+VALUES (1, 'Data Science', 3000.00),
+(2,'AI',5000.00),
+(3,'Ml',4000.00),
+(4,'Os',2500.00),
+(5,'Js',3000.00);
+
+INSERT INTO ENROLLMENT (enroll_id, student_id, course_id)
+VALUES (1, 001, 1),
+(2,002,2),
+(3,003,3),
+(4,004,4),
+(5,005,5),
+(6,006,2),
+(7,007,1),
+(8,008,5),
+(9,009,3),
+(10,010,2),
+(11,002,4),
+(12,004,1),
+(13,005,3),
+(14,003,5),
+(15,007,2)
+;
+
+
+//TASK3//**
+
+-----------INSERT-------
+
+USE clgDB;
+INSERT INTO students VALUES
+(11,'LM','lm@gmail.com',23,'2026-02-05',1),
+(12,'MN','mn@gmail.com',24,'2026-02-06',1),
+(13,'NO','no@gmail.com',22,'2026-02-07',1);
+
+
+INSERT INTO courses VALUES (6,'Advanced AI',12000.00);
+
+
+INSERT INTO enrollments (enroll_id, student_id, course_id)
+VALUES (16,11,6),
+(17,12,6),
+(18,13,6);
+
+
+-----SELECT------
+
+use clgDB;
+SELECT * FROM students;
+
+SELECT name,email from students;
+
+SELECT * FROM students ORDER BY age DESC;
+
+SELECT TOP 5 * FROM students ORDER by join_date;
+
+SELECT DISTINCT age FROM students; 
+
+SELECT DISTINCT course_name FROM courses;
+
+-------UPDATE--------
+
+use clgDB;
+UPDATE students SET age = 25 WHERE student_id = 11;
+
+UPDATE students SET active_flag = 0 WHERE student_id IN (12,13);
+
+UPDATE courses SET fees = fees * 1.10;
+
+
+----------DELETE----------
+
+use clgDB;
+DELETE FROM students WHERE student_id=12;
+
+DELETE FROM courses WHERE fees<1000;
+
+DELETE FROM ENROLLMENT WHERE enroll_timestamp < '2026-02-02'; 
+
+----------ALTER-------------
+
+use clgDB;
+
+ALTER TABLE students ALTER COLUMN name VARCHAR(150);
+
+EXEC sp_rename 'students.join_date', 'registration_date', 'COLUMN';
+
+ALTER TABLE students ADD phone_number VARCHAR(15);
+
+
+
+
+//TASK4//**
+
+------------WHERE-----------
+
+use clgDB;
+
+SELECT * FROM students WHERE age>21;
+
+SELECT * FROM students WHERE active_flag=1;
+
+SELECT * FROM courses WHERE fees BETWEEN 1000 AND 5000;
+
+SELECT * FROM students WHERE age IN(20,22,25);
+
+-------AND/OR-------
+
+use clgDB;
+
+SELECT * FROM students WHERE age>20 AND active_flag=1;
+
+SELECT * FROM students WHERE age<20 OR active_flag=0;
+
+SELECT * FROM courses WHERE fees>2000 AND course_name LIKE '%Data%';
+
+----------LIKE PATTERN------------
+use clgDB;
+
+SELECT * FROM students WHERE email LIKE '%gmail.com%';
+
+SELECT * FROM courses WHERE course_name LIKE '%Data%';
+
+----------NULL CHECKS---------
+
+use clgDB;
+INSERT INTO students (student_id, name, email, age, registration_date, active_flag)
+VALUES (20,'NULLAGE','null@gmail.com',NULL,'2026-02-10',1);
+
+SELECT * FROM students WHERE age IS NULL;
+
+SELECT * FROM students WHERE age IS NOT NULL;
+
+//TASK5??**
+----------COUNT----------
+
+use clgDB;
+SELECT COUNT(*) AS total_students FROM students;
+
+SELECT COUNT(*) AS active_students
+FROM students
+WHERE active_flag = 1;
+
+----------SUM/AVG--------
+
+use clgDB;
+SELECT SUM(fees) AS total_fees FROM courses;
+
+SELECT AVG(fees) AS average_fee FROM courses;
+
+SELECT SUM(fees) AS fees_above_2000
+FROM courses
+WHERE fees > 2000;
+
+-----MIN/MAX--------------
+
+use clgDB;
+SELECT MIN(age) AS min_age FROM students;
+
+SELECT MAX(fees) AS max_fee FROM courses;
+
+SELECT MAX(registration_date) AS latest_join FROM students;
+
+SELECT MIN(registration_date) AS oldest_join FROM students;
+
+
+-------GROUP BY-------
+
+use clgDB;
+SELECT active_flag, COUNT(*) AS count_students
+FROM students
+GROUP BY active_flag;
+
+SELECT age, COUNT(*) AS count_students
+FROM students
+GROUP BY age;
+
+SELECT course_id, SUM(fees) AS total_fees
+FROM courses
+GROUP BY course_id;
+
+---------HAVING---------
+
+use clgDB;
+SELECT course_id, COUNT(*) AS total_enrollments
+FROM ENROLLMENT
+GROUP BY course_id
+HAVING COUNT(*) > 3;
+
+SELECT age, AVG(age) AS avg_age
+FROM students
+GROUP BY age
+HAVING AVG(age) > 21;
+
+SELECT course_id, COUNT(*) AS total_enrollments
+FROM ENROLLMENT
+GROUP BY course_id
+HAVING COUNT(*) > 2;
+
+
+
+//TASK6//**
+
+use clgDB;
+SELECT * FROM students WHERE age>20 ORDER BY age;
+
+SELECT COUNT(*) AS count_students FROM students WHERE name LIKE '%a%';
+
+SELECT * FROM courses WHERE fees BETWEEN 1000 AND 5000 ORDER BY fees;
+
+SELECT * FROM students WHERE active_flag=0 AND age IS NOT NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
